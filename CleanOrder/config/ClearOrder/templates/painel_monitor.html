@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanOrder - Painel de Vistorias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 font-sans text-slate-700 antialiased min-h-screen flex">
+
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between hidden md:flex shrink-0">
+        <div>
+            <div class="p-6 flex items-center space-x-3">
+                <div class="bg-blue-600 text-white p-2 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-sparkles text-lg"></i>
+                </div>
+                <span class="text-xl font-bold text-blue-900">CleanOrder</span>
+            </div>
+
+            <div class="px-4 mt-2">
+                <div class="px-4 py-3 bg-blue-50/70 rounded-xl">
+                    <span class="text-[10px] font-bold tracking-wider text-blue-600 uppercase block mb-0.5">Perfil</span>
+                    <span class="text-sm font-semibold text-slate-800">Monitor</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4">
+            <a href="{% url 'logout' %}" class="flex items-center space-x-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-rose-600 rounded-xl transition">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span class="font-semibold">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+            <h1 class="text-base font-bold text-slate-800">Painel de Vistorias</h1>
+            
+            <div class="flex items-center space-x-4">
+                <button class="relative text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                </button>
+                <div class="w-9 h-9 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
+                        {% if request.user.first_name %}
+    
+                            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                        {% else %}
+      
+                            {{ request.user.username|slice:":2"|upper }}
+                        {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-y-auto">
+          <section class="lg:col-span-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="font-bold text-slate-900 text-base">Quartos ({{ estudantes|length }})</h2>
+                    <span class="text-xs text-slate-400 font-medium">
+                        {{ total_pendentes|default:estudantes|length }} pendentes
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    {% for item in estudantes %}
+                        <a href="{% url 'detalhes_quarto' item.quarto.id %}" class="bg-white p-4 rounded-2xl border border-slate-100 hover:border-slate-200 flex items-center justify-between shadow-sm block transition">
+                            <div class="flex items-center justify-between w-full">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm">{{ item.quarto|default:item.pk }}</h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">{{ item.andar|default:"1" }}º andar · {{ item.moradores_count|default:"1" }} morador(es)</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    
+                                 
+                                    {% if item.quarto.status == 'Aprovado' %}
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[11px] font-semibold rounded-full">Aprovado</span>
+                                    {% elif item.quarto.status == 'Reprovado' %}
+                                        <span class="px-2.5 py-1 bg-rose-50 text-rose-600 text-[11px] font-semibold rounded-full">Reprovado</span>
+                                    {% else %}
+                                        <span class="px-2.5 py-1 bg-amber-50 text-amber-600 text-[11px] font-semibold rounded-full">Pendente</span>
+                                    {% endif %}
+                                    
+                                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs ml-2"></i>
+                                </div>
+                            </div>
+                        </a>
+                    {% empty %}
+                        <p class="text-xs text-slate-400">Nenhum quarto cadastrado.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="lg:col-span-8 bg-slate-50/60 p-6 rounded-2xl border border-slate-200/60 flex flex-col justify-between">
+                
+                {% if quarto_selecionado %}
+                    <form action="{% url 'detalhes_quarto' quarto_selecionado.id %}" method="POST" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <div>
+                            <h2 class="text-xl font-bold text-blue-900">{{ quarto_selecionado }}</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Vistoria do Quarto</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <h3 class="text-xs font-bold tracking-wider text-slate-500 uppercase">Critérios de Avaliação</h3>
+                            
+                            <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Chão limpo</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Varrido e lavado</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Lixo retirado</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Lixeira vazia</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Camas organizadas</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Arrumadas e sem roupa no chão</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Banheiro limpo</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Pia, vaso e chuveiro</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label for="observacoes" class="text-sm font-bold text-slate-800">Observações</label>
+                            <textarea name="observacoes" id="observacoes" rows="3" placeholder="Descreva detalhes relevantes sobre o quarto..." class="w-full p-3.5 bg-slate-100/70 border border-slate-200/80 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                          
+                            <button type="submit" name="aprovado" value="False" class="w-full py-3 text-rose-600 font-semibold border border-rose-200 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
+                                <i class="fa-solid fa-xmark mr-2"></i> Reprovar
+                            </button>
+
+                            
+                            <button type="submit" name="aprovado" value="True" class="w-full py-3 text-white font-semibold bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-sm">
+                                <i class="fa-solid fa-check mr-2"></i> Aprovar
+                            </button>
+                        </div>
+                    </form>
+
+                {% else %}
+                    <div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
+                        <i class="fa-solid fa-clipboard-check text-5xl text-slate-300"></i>
+                        <p class="font-medium text-sm">Selecione um quarto na lista ao lado para iniciar a vistoria.</p>
+                    </div>
+                {% endif %}
+
+            </section>
+        </main>
+    </div>
+</body>
+</html>

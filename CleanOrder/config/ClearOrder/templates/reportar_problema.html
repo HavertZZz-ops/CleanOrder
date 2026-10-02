@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}CleanOrder - Reportar Problema{% endblock %}
+
+{% block header_title %}Reportar{% endblock %}
+
+{% block content %}
+
+        <main class="flex-1 p-8 overflow-y-auto flex justify-center items-start">
+            
+            <div class="w-full max-w-2xl bg-white p-8 rounded-2xl border border-slate-200 shadow-sm mt-4">
+                
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-slate-900">Reportar Problema</h2>
+                    <p class="text-sm text-slate-500 mt-1">Descreva o problema de infraestrutura encontrado no seu quarto ou bloco.</p>
+                </div>
+
+                <form action="{% url 'enviar_relatorio' %}" method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <div class="space-y-2">
+                        <label for="titulo" class="text-sm font-bold text-slate-800">Título do Problema</label>
+                        <input type="text" id="titulo" name="titulo" placeholder="Ex: Lâmpada queimada, Chuveiro frio..." class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" required>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="categoria" class="text-sm font-bold text-slate-800">Categoria</label>
+                        <select id="categoria" name="categoria" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none" required>
+                            <option value="" disabled selected>Selecione o tipo de problema...</option>
+                            <option value="eletrica">Elétrica (Lâmpadas, tomadas, chuveiro)</option>
+                            <option value="hidraulica">Hidráulica (Vazamentos, torneiras, vaso)</option>
+                            <option value="mobiliario">Mobiliário (Camas, armários, portas)</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="descricao" class="text-sm font-bold text-slate-800">Descrição Detalhada</label>
+                        <textarea id="descricao" name="descricao" rows="5" placeholder="Explique exatamente onde está o problema e o que aconteceu..." class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none" required></textarea>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex justify-end space-x-3">
+                        <a href="{% url 'painel_estudante' %}" class="py-3 px-6 bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 font-semibold text-sm rounded-xl transition">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="py-3 px-6 bg-blue-600 text-white hover:bg-blue-700 font-semibold text-sm rounded-xl transition flex items-center space-x-2 shadow-sm">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Enviar Relatório</span>
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </main>
+    </div>
+{% endblock content %}
