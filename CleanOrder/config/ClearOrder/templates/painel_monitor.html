@@ -40,9 +40,54 @@
             <h1 class="text-base font-bold text-slate-800">Painel de Vistorias</h1>
             
             <div class="flex items-center space-x-4">
-                <button class="relative text-slate-400 hover:text-slate-600 transition">
-                    <i class="fa-regular fa-bell text-lg"></i>
-                </button>
+                {% comment %}
+                    Sino + dropdown de notificações (mockup só de front-end).
+                    Mesma estrutura do base.html. Este template é standalone,
+                    então não herda nada - o JS também vai no fim do arquivo.
+                {% endcomment %}
+                <div class="relative">
+                    <button type="button" onclick="toggleNotificacoes(event)"
+                        aria-label="Notificações" aria-expanded="false"
+                        class="relative text-slate-400 hover:text-blue-600 transition">
+                        <i class="fa-regular fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+                    </button>
+
+                    <div id="dropdown-notificacoes"
+                        class="absolute right-0 mt-3 w-80 bg-white rounded-2xl border border-slate-100 shadow-xl z-50 hidden">
+
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                            <span class="text-sm font-bold text-slate-800">Notificações</span>
+                            <span class="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">2 novas</span>
+                        </div>
+
+                        <div class="p-2 space-y-1">
+                            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition">
+                                <div class="shrink-0 w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 leading-tight">A vistoria do seu quarto foi aprovada!</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">há 2 horas</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition">
+                                <div class="shrink-0 w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 leading-tight">Nova tarefa atribuída: Limpeza das janelas</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">há 5 horas</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="px-4 py-3 border-t border-slate-100 text-center">
+                            <span class="text-xs font-semibold text-blue-600">Ver todas</span>
+                        </div>
+                    </div>
+                </div>
                 <div class="w-9 h-9 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                         {% if request.user.first_name %}
     
@@ -96,46 +141,46 @@
             <section class="lg:col-span-8 bg-slate-50/60 p-6 rounded-2xl border border-slate-200/60 flex flex-col justify-between">
                 
                 {% if quarto_selecionado %}
-                    <form action="{% url 'detalhes_quarto' quarto_selecionado.id %}" method="POST" class="space-y-6">
+                    <form id="form-vistoria" action="{% url 'detalhes_quarto' quarto_selecionado.id %}" method="POST" class="space-y-6">
                         {% csrf_token %}
+                        <input type="hidden" name="aprovado" id="input-aprovado" value="">
                         
                         <div>
                             <h2 class="text-xl font-bold text-blue-900">{{ quarto_selecionado }}</h2>
                             <p class="text-xs text-slate-400 mt-0.5">Vistoria do Quarto</p>
                         </div>
 
+                        {% comment %}
+                            Critérios reflitindo a entrevista de validação
+                            com o monitor do alojamento (Vandinho).
+                        {% endcomment %}
                         <div class="space-y-3">
-                            <h3 class="text-xs font-bold tracking-wider text-slate-500 uppercase">Critérios de Avaliação</h3>
-                            
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-bold tracking-wider text-slate-500 uppercase">Critérios de Avaliação</h3>
+                                <span class="text-[11px] font-semibold text-slate-400">Nota: 0 a 10</span>
+                            </div>
+
                             <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
-                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <input type="checkbox" name="chao_lavanderia" value="1" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
                                 <div>
-                                    <p class="text-sm font-bold text-slate-800 leading-tight">Chão limpo</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Varrido e lavado</p>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Chão e Lavanderia limpos <span class="text-xs font-semibold text-blue-600">+4</span></p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Piso varrido e roupa lavada</p>
                                 </div>
                             </label>
 
                             <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
-                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <input type="checkbox" name="organizacao_geral" value="1" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
                                 <div>
-                                    <p class="text-sm font-bold text-slate-800 leading-tight">Lixo retirado</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Lixeira vazia</p>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Organização Geral (Quarto livre de bagunça aparente) <span class="text-xs font-semibold text-blue-600">+3</span></p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Camas, mesas e objetos no lugar</p>
                                 </div>
                             </label>
 
                             <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
-                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
+                                <input type="checkbox" name="janelas_livres" value="1" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
                                 <div>
-                                    <p class="text-sm font-bold text-slate-800 leading-tight">Camas organizadas</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Arrumadas e sem roupa no chão</p>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center p-4 bg-slate-100/70 border border-slate-200/60 rounded-xl cursor-pointer hover:bg-slate-100 transition">
-                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 mr-4">
-                                <div>
-                                    <p class="text-sm font-bold text-slate-800 leading-tight">Banheiro limpo</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Pia, vaso e chuveiro</p>
+                                    <p class="text-sm font-bold text-slate-800 leading-tight">Janelas Livres (Sem roupas ou objetos pendurados) <span class="text-xs font-semibold text-blue-600">+3</span></p>
+                                    <p class="text-xs text-slate-400 mt-0.5">Sem varais, cortinas ou objetos nas janelas</p>
                                 </div>
                             </label>
                         </div>
@@ -145,18 +190,55 @@
                             <textarea name="observacoes" id="observacoes" rows="3" placeholder="Descreva detalhes relevantes sobre o quarto..." class="w-full p-3.5 bg-slate-100/70 border border-slate-200/80 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 pt-2">
-                          
-                            <button type="submit" name="aprovado" value="False" class="w-full py-3 text-rose-600 font-semibold border border-rose-200 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
+                        {% comment %}
+                            Trava de loop de aprovação.
+
+                            Os dois blocos ficam sempre no DOM e o {% if %} decide
+                            qual aparece. Isso é necessário porque o botão
+                            "Editar" só funciona se os botões de Aprovar/Reprovar
+                            existirem para serem reexibidos via JS.
+                        {% endcomment %}
+
+                        <div id="area-botoes" class="grid grid-cols-2 gap-4 pt-2 {% if quarto_selecionado.status != 'Pendente' %}hidden{% endif %}">
+                            <button type="button" id="btn-reprovar" onclick="abrirModal('False')" class="w-full py-3 text-rose-600 font-semibold border border-rose-200 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
                                 <i class="fa-solid fa-xmark mr-2"></i> Reprovar
                             </button>
 
-                            
-                            <button type="submit" name="aprovado" value="True" class="w-full py-3 text-white font-semibold bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-sm">
+                            <button type="button" id="btn-aprovar" onclick="abrirModal('True')" class="w-full py-3 text-white font-semibold bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-sm">
                                 <i class="fa-solid fa-check mr-2"></i> Aprovar
                             </button>
                         </div>
+
+                        <div id="area-concluida" class="pt-2 space-y-4 {% if quarto_selecionado.status == 'Pendente' %}hidden{% endif %}">
+                            <div class="p-5 rounded-2xl border border-emerald-200 bg-emerald-50/50 flex items-start gap-4">
+                                <div class="shrink-0 w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-slate-900 leading-tight">Vistoria Concluída</p>
+                                    <p class="text-xs text-slate-500 mt-1">
+                                        Status atual:
+                                        {% if quarto_selecionado.status == 'Aprovado' %}
+                                            <span class="font-semibold text-emerald-600">Aprovado</span>
+                                        {% else %}
+                                            <span class="font-semibold text-rose-600">Reprovado</span>
+                                        {% endif %}
+                                        {% if ultima_vistoria %}
+                                            · Nota {{ ultima_vistoria.nota }}/10
+                                        {% endif %}
+                                    </p>
+                                    {% if ultima_vistoria.observacoes %}
+                                        <p class="text-xs text-slate-500 mt-2 italic">"{{ ultima_vistoria.observacoes }}"</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <button type="button" id="btn-editar" onclick="editarVistoria()" class="w-full py-3 text-slate-600 font-semibold border border-slate-200 bg-white hover:bg-slate-50 rounded-xl transition">
+                                <i class="fa-solid fa-pen mr-2"></i> Editar
+                            </button>
+                        </div>
                     </form>
+
 
                 {% else %}
                     <div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
@@ -166,7 +248,185 @@
                 {% endif %}
 
             </section>
+
+            {% comment %}
+                Chamados de infraestrutura reportados pelos estudantes.
+                O botão envia um POST de verdade: o status "Verificado" fica
+                salvo no banco (campo status já existe, sem migração).
+            {% endcomment %}
+            <section class="lg:col-span-12 bg-white border border-slate-200/60 rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-bold text-slate-900 text-base">Chamados de Infraestrutura</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Problemas estruturais reportados pelos estudantes</p>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium">{{ reparos|length }} chamado(s)</span>
+                </div>
+
+                <div class="space-y-3">
+                    {% for reparo in reparos %}
+                        <div class="p-4 rounded-xl border flex items-center justify-between gap-4 {% if reparo.status == 'Verificado' %}bg-emerald-50/50 border-emerald-200{% else %}bg-white border-slate-100{% endif %}">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="font-bold text-slate-900 text-sm">{{ reparo.titulo }}</h3>
+
+                                    {% if reparo.status == 'Verificado' %}
+                                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[11px] font-semibold rounded-full">Verificado</span>
+                                    {% else %}
+                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-[11px] font-semibold rounded-full">{{ reparo.status }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <p class="text-xs text-slate-500 mt-1">{{ reparo.descricao }}</p>
+
+                                <p class="text-[11px] text-slate-400 mt-1">
+                                    <i class="fa-solid fa-location-dot mr-1"></i>{{ reparo.estudante.quarto|default:"sem quarto" }}
+                                    <span class="mx-1">·</span>
+                                    <i class="fa-regular fa-clock mr-1"></i>{{ reparo.data_abertura|date:"d/m/Y" }}
+                                </p>
+                            </div>
+
+                            {% if reparo.status == 'Verificado' %}
+                                <span class="shrink-0 text-emerald-600 font-semibold text-xs flex items-center gap-1.5">
+                                    <i class="fa-solid fa-check-double"></i> Verificado
+                                </span>
+                            {% else %}
+                                <form action="{% url 'verificar_reparo' reparo.id %}" method="POST" class="shrink-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded-full hover:bg-emerald-700 transition whitespace-nowrap">
+                                        <i class="fa-solid fa-check-double mr-1"></i> Marcar como Verificado
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-slate-400">Nenhum chamado aberto.</p>
+                    {% endfor %}
+                </div>
+            </section>
         </main>
     </div>
+    {% comment %}
+        'flex' NAO fica aqui de proposito: entra so via JS ao abrir.
+        Assim o modal e sempre display:flex quando visivel (items-center/
+        justify-center so funcionam em container flex) e display:none quando
+        fechado, sem depender da ordem das classes do Tailwind.
+    {% endcomment %}
+    <div id="modal-confirmacao" class="fixed inset-0 z-50 items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div class="flex items-start gap-4">
+                <div id="modal-icone" class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-600 text-white">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="min-w-0">
+                    <p id="modal-titulo" class="text-base font-bold text-slate-900 leading-tight">Confirmar vistoria</p>
+                    <p id="modal-texto" class="text-sm text-slate-500 mt-1">Deseja confirmar esta vistoria?</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="fecharModal()" class="w-full py-3 text-slate-600 font-semibold border border-slate-200 bg-white hover:bg-slate-50 rounded-xl transition">
+                    Recusar
+                </button>
+
+                <button type="button" id="modal-confirmar" onclick="confirmarModal()" class="w-full py-3 text-white font-semibold bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-sm">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var decisaoPendente = '';
+
+        function abrirModal(valor) {
+            decisaoPendente = valor;
+            var aprovar = (valor === 'True');
+
+            document.getElementById('modal-titulo').textContent = aprovar ? 'Confirmar aprovação' : 'Confirmar reprovação';
+            document.getElementById('modal-texto').textContent = aprovar
+                ? 'Deseja confirmar a aprovação?'
+                : 'Deseja confirmar a reprovação?';
+
+            var icone = document.getElementById('modal-icone');
+            icone.className = 'shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-white ' + (aprovar ? 'bg-emerald-600' : 'bg-rose-600');
+            icone.innerHTML = '<i class="fa-solid ' + (aprovar ? 'fa-check' : 'fa-xmark') + '"></i>';
+
+            var botao = document.getElementById('modal-confirmar');
+            botao.className = 'w-full py-3 text-white font-semibold rounded-xl transition shadow-sm ' + (aprovar ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700');
+
+            // 'flex' entra junto com a remocao de 'hidden' para centralizar.
+            var modal = document.getElementById('modal-confirmacao');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharModal() {
+            var modal = document.getElementById('modal-confirmacao');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            decisaoPendente = '';
+        }
+
+        function confirmarModal() {
+            document.getElementById('input-aprovado').value = decisaoPendente;
+            document.getElementById('form-vistoria').submit();
+        }
+
+        function editarVistoria() {
+            document.getElementById('area-concluida').classList.add('hidden');
+            document.getElementById('area-botoes').classList.remove('hidden');
+        }
+    </script>
+
+    {% comment %}
+        Notificações - mesmas funções do base.html. Nomes sem colisão com o
+        JS da vistoria acima (abrirModal / fecharModal / confirmarModal).
+    {% endcomment %}
+    <script>
+        function toggleNotificacoes(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            var menu = document.getElementById('dropdown-notificacoes');
+            if (!menu) {
+                return;
+            }
+
+            menu.classList.toggle('hidden');
+
+            var botao = document.querySelector('[aria-label="Notificações"]');
+            if (botao) {
+                botao.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
+            }
+        }
+
+        function fecharNotificacoes() {
+            var menu = document.getElementById('dropdown-notificacoes');
+            if (menu) {
+                menu.classList.add('hidden');
+            }
+            var botao = document.querySelector('[aria-label="Notificações"]');
+            if (botao) {
+                botao.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // Clica fora do menu -> fecha
+        document.addEventListener('click', function () {
+            var menu = document.getElementById('dropdown-notificacoes');
+            if (menu && !menu.classList.contains('hidden')) {
+                fecharNotificacoes();
+            }
+        });
+
+        // Esc -> fecha
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                fecharNotificacoes();
+            }
+        });
+    </script>
 </body>
 </html>

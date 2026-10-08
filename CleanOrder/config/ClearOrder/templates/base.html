@@ -76,11 +76,53 @@
                </h2>
             
             <div class="flex items-center space-x-5">
-                <!--Notificação -->
-                <button class="relative text-slate-400 hover:text-blue-600 transition">
-                    <i class="fa-regular fa-bell text-xl"></i>
-                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
-                </button>
+                {% comment %}
+                    Sino + dropdown de notificações (mockup só de front-end).
+                    O <div class="relative"> é o que ancora o menu abaixo do ícone.
+                {% endcomment %}
+                <div class="relative">
+                    <button type="button" onclick="toggleNotificacoes(event)"
+                        aria-label="Notificações" aria-expanded="false"
+                        class="relative text-slate-400 hover:text-blue-600 transition">
+                        <i class="fa-regular fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+                    </button>
+
+                    <div id="dropdown-notificacoes"
+                        class="absolute right-0 mt-3 w-80 bg-white rounded-2xl border border-slate-100 shadow-xl z-50 hidden">
+
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                            <span class="text-sm font-bold text-slate-800">Notificações</span>
+                            <span class="text-[10px] font-semibold text-blue-600 uppercase tracking-wider">2 novas</span>
+                        </div>
+
+                        <div class="p-2 space-y-1">
+                            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition">
+                                <div class="shrink-0 w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 leading-tight">A vistoria do seu quarto foi aprovada!</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">há 2 horas</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition">
+                                <div class="shrink-0 w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 leading-tight">Nova tarefa atribuída: Limpeza das janelas</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">há 5 horas</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="px-4 py-3 border-t border-slate-100 text-center">
+                            <span class="text-xs font-semibold text-blue-600">Ver todas</span>
+                        </div>
+                    </div>
+                </div>
                 
                 <!--Nome do Usuário -->
                 <div class="flex items-center space-x-3 border-l border-slate-200 pl-5">
@@ -137,5 +179,58 @@
         </main>
 
     </div>
+
+    {% comment %}
+        Fica FORA do bloco scripts de propósito: painel_estudante.html define
+        o proprio {% block scripts %}, e um bloco filho substitui o do pai.
+        Aqui o JS do sino é sempre renderizado.
+    {% endcomment %}
+    <script>
+        function toggleNotificacoes(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            var menu = document.getElementById('dropdown-notificacoes');
+            if (!menu) {
+                return;
+            }
+
+            menu.classList.toggle('hidden');
+
+            var botao = document.querySelector('[aria-label="Notificações"]');
+            if (botao) {
+                botao.setAttribute('aria-expanded', menu.classList.contains('hidden') ? 'false' : 'true');
+            }
+        }
+
+        function fecharNotificacoes() {
+            var menu = document.getElementById('dropdown-notificacoes');
+            if (menu) {
+                menu.classList.add('hidden');
+            }
+            var botao = document.querySelector('[aria-label="Notificações"]');
+            if (botao) {
+                botao.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // Clica fora do menu -> fecha
+        document.addEventListener('click', function () {
+            var menu = document.getElementById('dropdown-notificacoes');
+            if (menu && !menu.classList.contains('hidden')) {
+                fecharNotificacoes();
+            }
+        });
+
+        // Esc -> fecha
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                fecharNotificacoes();
+            }
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

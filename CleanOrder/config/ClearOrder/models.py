@@ -1,13 +1,21 @@
 from django.db import models
-
-from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 
 
 class Quarto(models.Model):
+    STATUS_PENDENTE = 'Pendente'
+    STATUS_APROVADO = 'Aprovado'
+    STATUS_REPROVADO = 'Reprovado'
+    STATUS_CHOICES = [
+        (STATUS_PENDENTE, 'Pendente'),
+        (STATUS_APROVADO, 'Aprovado'),
+        (STATUS_REPROVADO, 'Reprovado'),
+    ]
+
     numero = models.CharField(max_length=10)
     bloco = models.CharField(max_length=10)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDENTE)
     streak_dias = models.IntegerField(default=0)
     pontuacao_geral = models.IntegerField(default=0)
 

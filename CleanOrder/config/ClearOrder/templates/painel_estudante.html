@@ -47,17 +47,26 @@
                             </span>
                             
                             {% if tarefa.status == 'Concluída' %}
-                                <span class="text-emerald-700 bg-emerald-100 text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2">
+                                <span class="emerald-700 bg-emerald-100 text-sm font-semibold px-4 py-2 rounded-lg flex items-center gap-2">
                                     <i class="fa-solid fa-circle-check"></i>
                                     <span>Concluída</span>
                                 </span>
                             {% else %}
-                                <a href="{% url 'concluir_tarefa' tarefa.id %}" 
-                                    onclick="return confirm('Tem certeza que deseja confirmar a conclusão desta tarefa?');" 
-                                    class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-emerald-200 transition">
-                                    <i class="fa-solid fa-check mr-1"></i> Concluir
-                                </a>
+                                {% comment %}
+                                    Form GET porque a rota concluir_tarefa já é um
+                                    GET (link). O submit() no modal reproduz
+                                    exatamente a navegação do antigo <a>, sem
+                                    precisar mexer na view.
+                                {% endcomment %}
+                                <form id="form-tarefa-{{ tarefa.id }}" action="{% url 'concluir_tarefa' tarefa.id %}" method="GET" class="inline">
+                                    <button type="button"
+                                        onclick="abrirModalEstudante('form-tarefa-{{ tarefa.id }}')"
+                                        class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-emerald-200 transition">
+                                        <i class="fa-solid fa-check mr-1"></i> Concluir
+                                    </button>
+                                </form>
                             {% endif %}
+
                         </div>
                     </div>
                 {% empty %}
@@ -73,7 +82,12 @@
 
                 <!--    Card de streak  -->
 
-               {% with streak_atual=estudante.quarto.streak|default:0 %}
+               {% comment %}
+                   Campo correto: streak_dias (o nome real no model Quarto).
+                   Caminho via 'estudante' porque a view painel_estudante
+                   so coloca 'estudante' e 'tarefas' no contexto.
+               {% endcomment %}
+               {% with streak_atual=estudante.quarto.streak_dias|default:0 %}
                <div class="{% if streak_atual >= 3 %}bg-gradient-to-br from-amber-500 to-orange-600{% else %}bg-blue-600{% endif %} text-white p-6 rounded-2xl flex flex-col justify-between shadow-md transition-all duration-300">
                 <div>
                     <div class="flex items-center space-x-2 {% if streak_atual >= 3 %}text-amber-100{% else %}text-blue-100{% endif %} text-sm font-semibold">
@@ -82,7 +96,7 @@
                     </div>
                     <div class="mt-4 flex items-baseline space-x-2">
                         <span class="text-5xl font-black">
-                            {% if streak_atual < 10 %}0{% endif %}{{ streak_atual }}
+                            {{ streak_atual|stringformat:"02d" }}
                         </span>
                         <span class="text-xl">
                             {% if streak_atual >= 3 %}🔥{% else %}❄️{% endif %}
@@ -150,3 +164,57 @@
         </main>
     </div>
 {% endblock content %}
+
+{% block scripts %}
+
+    {% comment %}
+        'flex' NAO fica aqui de proposito: entra so via JS ao abrir,
+        para items-center/justify-center funcionarem (exigem display:flex).
+    {% endcomment %}
+    <div id="modal-estudante" class="fixed inset-0 z-50 items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div class="flex items-start gap-4">
+                <div class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-600 text-white">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="min-w-0">
+                    <p id="modal-estudante-titulo" class="text-base font-bold text-slate-900 leading-tight">Confirmar conclusão?</p>
+                    <p id="modal-estudante-texto" class="text-sm text-slate-500 mt-1">Você tem certeza que deseja marcar esta limpeza como concluída e enviar para vistoria?</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button type="button" onclick="fecharModalEstudante()" class="w-full py-3 text-slate-600 font-semibold border border-slate-200 bg-white hover:bg-slate-50 rounded-xl transition">
+                    Recusar
+                </button>
+
+                <button type="button" onclick="confirmarConclusaoEstudante()" class="w-full py-3 text-white font-semibold bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-sm">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var formularioPendente = '';
+
+        function abrirModalEstudante(formId) {
+            formularioPendente = formId;
+            var modal = document.getElementById('modal-estudante');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharModalEstudante() {
+            var modal = document.getElementById('modal-estudante');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            formularioPendente = '';
+        }
+
+        function confirmarConclusaoEstudante() {
+            document.getElementById(formularioPendente).submit();
+        }
+    </script>
+
+{% endblock scripts %}
